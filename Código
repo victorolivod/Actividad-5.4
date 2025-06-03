@@ -1,0 +1,68 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+# Título general del tablero
+st.title("Análisis Integral de Pedidos y Ventas")
+
+# Carga de datos
+@st.cache_data
+def cargar_datos():
+    return pd.read_csv('datos.csv')
+
+df = cargar_datos()
+
+# Sidebar con filtros interactivos
+st.sidebar.header("Filtros Interactivos")
+region = st.sidebar.selectbox("Selecciona una región:", sorted(df['region'].dropna().unique()))
+tipo_cliente = st.sidebar.selectbox("Selecciona tipo de cliente:", sorted(df['tipo_cliente'].dropna().unique()))
+rango_fecha = st.sidebar.slider(
+    "Rango de fecha de compra:",
+    min_value=pd.to_datetime(df['fecha_compra']).min(),
+    max_value=pd.to_datetime(df['fecha_compra']).max(),
+    value=(pd.to_datetime(df['fecha_compra']).min(), pd.to_datetime(df['fecha_compra']).max()),
+    format="YYYY-MM-DD"
+)
+
+# Filtrado de datos
+df['fecha_compra'] = pd.to_datetime(df['fecha_compra'])
+df_filtro = df[
+    (df['region'] == region) &
+    (df['tipo_cliente'] == tipo_cliente) &
+    (df['fecha_compra'] >= rango_fecha[0]) &
+    (df['fecha_compra'] <= rango_fecha[1])
+]
+
+# Layout con Tabs para organización
+tab1, tab2 = st.tabs(["Visualizaciones", "Narrativa del Análisis"])
+
+with tab1:
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Ventas por Categoría de Producto")
+        fig1 = px.bar(df_filtro, x='categoria_producto', y='precio_final', title="Ventas por Categoría")
+        st.plotly_chart(fig1, use_container_width=True)
+
+    with col2:
+        st.subheader("Evolución Temporal de Ventas")
+        ventas_por_fecha = df_filtro.groupby('fecha_compra')['precio_final'].sum().reset_index()
+        fig2 = px.line(ventas_por_fecha, x='fecha_compra', y='precio_final', title="Ventas a lo Largo del Tiempo")
+        st.plotly_chart(fig2, use_container_width=True)
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.subheader("Distribución de Volumen de Pedidos")
+        fig3 = px.histogram(df_filtro, x='volumen_trj', nbins=20, title="Volumen de Pedidos")
+        st.plotly_chart(fig3, use_container_width=True)
+
+    with col4:
+        st.subheader("Mapa de Pedidos por Región")
+        pedidos_por_region = df.groupby('region').size().reset_index(name='num_pedidos')
+        fig4 = px.bar(pedidos_por_region, x='region', y='num_pedidos', title="Pedidos por Región")
+        st.plotly_chart(fig4, use_container_width=True)
+
+with tab2:
+    st.header("Narrativa del Análisis")
+    st.markdown("""
