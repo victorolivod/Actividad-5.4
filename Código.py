@@ -22,7 +22,7 @@ region = st.sidebar.selectbox(
 )
 categoria = st.sidebar.selectbox(
     "Selecciona categoría de producto:",
-    sorted(df['categoria_producto'].dropna().unique())
+    sorted(df['categoria_simplificada'].dropna().unique())
 )
 
 # Conversión de columna de fecha
@@ -39,7 +39,7 @@ rango_fecha = st.sidebar.slider(
 # Filtrado de datos
 df_filtro = df[
     (df['region'] == region) &
-    (df['categoria_producto'] == categoria) &
+    (df['categoria_simplificada'] == categoria) &
     (df['fecha_compra_datetime'] >= rango_fecha[0]) &
     (df['fecha_compra_datetime'] <= rango_fecha[1])
 ]
@@ -54,7 +54,7 @@ with tab1:
         st.subheader("Ventas por Categoría de Producto")
         fig1 = px.bar(
             df_filtro,
-            x='categoria_producto', 
+            x='categoria_simplificada', 
             y='precio_final', 
             title="Ventas por Categoría"
         )
