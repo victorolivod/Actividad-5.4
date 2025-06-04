@@ -97,3 +97,20 @@ with tab1:
 with tab2:
     st.header("Narrativa del Análisis")
     st.markdown("""
+    **Inicio**  
+    Este dashboard presenta un análisis integral de los pedidos y ventas registrados, permitiendo filtrar por región, categoría de producto y rango de fechas.
+
+    **Hallazgos**  
+    - La gráfica de barras muestra las categorías de producto con mayores ventas.
+    - El gráfico temporal permite identificar tendencias estacionales y picos de ventas.
+    - El histograma de precio promedio revela la concentración de pedidos en ciertos rangos de precio.
+    - El gráfico de pedidos por región destaca las zonas con mayor actividad comercial.
+
+    **Análisis**  
+    El análisis revela que ciertas regiones y categorías concentran la mayor parte de las ventas, y que existen temporadas con picos significativos. Además, la distribución de precios ayuda a identificar oportunidades de optimización comercial.
+
+    **Recomendaciones**  
+    - Focalizar estrategias comerciales en las regiones y categorías con mayor potencial.
+    - Ajustar inventarios y logística en función de los picos de demanda detectados.
+    - Analizar a fondo los segmentos de clientes más rentables para personalizar ofertas.
+    """)
