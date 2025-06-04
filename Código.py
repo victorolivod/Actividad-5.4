@@ -9,7 +9,8 @@ st.title("Análisis Integral de Pedidos y Ventas")
 @st.cache_data
 def cargar_datos():
     df = pd.read_excel('df_DataBridgeConsulting (4).xlsx')
-    df.columns = df.columns.str.strip()  # Limpia espacios en los nombres de columna
+    # Limpieza de nombres de columnas
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
     return df
 
 df = cargar_datos()
@@ -21,18 +22,18 @@ region = st.sidebar.selectbox(
     sorted(df['region'].dropna().unique())
 )
 categoria = st.sidebar.selectbox(
-    "Selecciona categoría de producto:",
+    "Selecciona categoría simplificada:",
     sorted(df['categoria_simplificada'].dropna().unique())
 )
 
 # Conversión de columna de fecha
-df['fecha_compra_datetime'] = pd.to_datetime(df['fecha_compra_datetime'], errors='coerce')
+df['orden_compra_timestamp'] = pd.to_datetime(df['orden_compra_timestamp'], errors='coerce')
 
 rango_fecha = st.sidebar.slider(
     "Rango de fecha de compra:",
-    min_value=df['fecha_compra_datetime'].min(),
-    max_value=df['fecha_compra_datetime'].max(),
-    value=(df['fecha_compra_datetime'].min(), df['fecha_compra_datetime'].max()),
+    min_value=df['orden_compra_timestamp'].min(),
+    max_value=df['orden_compra_timestamp'].max(),
+    value=(df['orden_compra_timestamp'].min(), df['orden_compra_timestamp'].max()),
     format="YYYY-MM-DD"
 )
 
@@ -40,8 +41,8 @@ rango_fecha = st.sidebar.slider(
 df_filtro = df[
     (df['region'] == region) &
     (df['categoria_simplificada'] == categoria) &
-    (df['fecha_compra_datetime'] >= rango_fecha[0]) &
-    (df['fecha_compra_datetime'] <= rango_fecha[1])
+    (df['orden_compra_timestamp'] >= rango_fecha[0]) &
+    (df['orden_compra_timestamp'] <= rango_fecha[1])
 ]
 
 # Layout con Tabs para organización
@@ -51,21 +52,21 @@ with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Ventas por Categoría de Producto")
+        st.subheader("Ventas por Categoría Simplificada")
         fig1 = px.bar(
             df_filtro,
             x='categoria_simplificada', 
             y='precio_final', 
-            title="Ventas por Categoría"
+            title="Ventas por Categoría Simplificada"
         )
         st.plotly_chart(fig1, use_container_width=True)
 
     with col2:
         st.subheader("Evolución Temporal de Ventas")
-        ventas_por_fecha = df_filtro.groupby('fecha_compra_datetime')['precio_final'].sum().reset_index()
+        ventas_por_fecha = df_filtro.groupby('orden_compra_timestamp')['precio_final'].sum().reset_index()
         fig2 = px.line(
             ventas_por_fecha, 
-            x='fecha_compra_datetime', 
+            x='orden_compra_timestamp', 
             y='precio_final', 
             title="Ventas a lo Largo del Tiempo"
         )
@@ -74,12 +75,12 @@ with tab1:
     col3, col4 = st.columns(2)
 
     with col3:
-        st.subheader("Distribución del Precio Promedio por Pedido")
+        st.subheader("Distribución del Ticket Promedio")
         fig3 = px.histogram(
             df_filtro, 
-            x='precio_promedio_por_pedido', 
+            x='ticket_promedio', 
             nbins=20, 
-            title="Precio Promedio por Pedido"
+            title="Ticket Promedio"
         )
         st.plotly_chart(fig3, use_container_width=True)
 
@@ -98,19 +99,22 @@ with tab2:
     st.header("Narrativa del Análisis")
     st.markdown("""
     **Inicio**  
-    Este dashboard presenta un análisis integral de los pedidos y ventas registrados, permitiendo filtrar por región, categoría de producto y rango de fechas.
+    Este dashboard presenta un análisis integral de los pedidos y ventas registrados, permitiendo filtrar por región, categoría simplificada y rango de fechas.
 
     **Hallazgos**  
-    - La gráfica de barras muestra las categorías de producto con mayores ventas.
+    - La gráfica de barras muestra las categorías simplificadas con mayores ventas.
     - El gráfico temporal permite identificar tendencias estacionales y picos de ventas.
-    - El histograma de precio promedio revela la concentración de pedidos en ciertos rangos de precio.
+    - El histograma de ticket promedio revela la concentración de pedidos en ciertos rangos de valor.
     - El gráfico de pedidos por región destaca las zonas con mayor actividad comercial.
 
     **Análisis**  
-    El análisis revela que ciertas regiones y categorías concentran la mayor parte de las ventas, y que existen temporadas con picos significativos. Además, la distribución de precios ayuda a identificar oportunidades de optimización comercial.
+    El análisis revela que ciertas regiones y categorías concentran la mayor parte de las ventas, y que existen temporadas con picos significativos. Además, la distribución del ticket promedio ayuda a identificar oportunidades de optimización comercial.
 
     **Recomendaciones**  
     - Focalizar estrategias comerciales en las regiones y categorías con mayor potencial.
     - Ajustar inventarios y logística en función de los picos de demanda detectados.
     - Analizar a fondo los segmentos de clientes más rentables para personalizar ofertas.
     """)
+
+# Nota: Asegúrate de que los nombres de las columnas coincidan exactamente con los de tu archivo Excel.
+# Sube este archivo junto con 'df_DataBridgeConsulting (4).xlsx' y un requirements.txt a tu repositorio de GitHub.
