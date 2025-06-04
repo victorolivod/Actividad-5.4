@@ -28,21 +28,26 @@ categoria = st.sidebar.selectbox(
 
 # Conversión de columna de fecha
 df['orden_compra_timestamp'] = pd.to_datetime(df['orden_compra_timestamp'], errors='coerce')
+fechas_validas = df['orden_compra_timestamp'].dropna()
+
+# Convertir a tipo date para el slider
+min_fecha = fechas_validas.min().date()
+max_fecha = fechas_validas.max().date()
 
 rango_fecha = st.sidebar.slider(
     "Rango de fecha de compra:",
-    min_value=df['orden_compra_timestamp'].min(),
-    max_value=df['orden_compra_timestamp'].max(),
-    value=(df['orden_compra_timestamp'].min(), df['orden_compra_timestamp'].max()),
+    min_value=min_fecha,
+    max_value=max_fecha,
+    value=(min_fecha, max_fecha),
     format="YYYY-MM-DD"
 )
 
-# Filtrado de datos
+# Filtrado de datos usando fechas como date
 df_filtro = df[
     (df['region'] == region) &
     (df['categoria_simplificada'] == categoria) &
-    (df['orden_compra_timestamp'] >= rango_fecha[0]) &
-    (df['orden_compra_timestamp'] <= rango_fecha[1])
+    (df['orden_compra_timestamp'].dt.date >= rango_fecha[0]) &
+    (df['orden_compra_timestamp'].dt.date <= rango_fecha[1])
 ]
 
 # Layout con Tabs para organización
@@ -118,3 +123,4 @@ with tab2:
 
 # Nota: Asegúrate de que los nombres de las columnas coincidan exactamente con los de tu archivo Excel.
 # Sube este archivo junto con 'df_DataBridgeConsulting (4).xlsx' y un requirements.txt a tu repositorio de GitHub.
+
